@@ -5,7 +5,9 @@ Author = Anton Golles
 from math import factorial
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy.sparse import diags, spmatrix, linalg, save_npz, lil_matrix
+from datetime import datetime
 
 def binary_conv(x, L):
 	'''
@@ -114,29 +116,120 @@ def construct_Hamiltonian(L = 4, W = 2, U = 1, t = .42, seed=42):
 	return H
 
 def diag_sparse(sparse_hamiltonian, k=3):
+	'''
+	Diagonalizes sparse Hamiltonian
+	Returns (eigenvalues, eigenvectors)
+	'''
     (eigvals, eigvecs) =  linalg.eigsh(sparse_hamiltonian, k=k)
+    #print(eigvals)
     return (eigvals, eigvecs.T)
 
 def level_spacing(eigvals):
-	level_spacing = [abs(eigvals[i]-eigvals[i+1]) for i in range(len(eigvals)-1)]
-	level_spacing.append(abs(eigvals[len(eigvals)-1]-eigvals[0]))
-	return np.mean(level_spacing)
+	s = [eigvals[i+1]-eigvals[i] for i in range(len(eigvals)-1)]
+	s.append(abs(eigvals[len(eigvals)-1]-eigvals[0]))
+	return s
 
-print(diag_sparse(construct_sparse_Hamiltonian()))
+
+def obtain_s_r(num_w=4, num_seeds=10,L=10,save=False):
+
+	s = []
+	ws = np.linspace(.2,6,num_w)
+	for w in ws:
+		print('W = ',w)
+		S = []
+		for seed in range(num_seeds):
+			(eigvals, eigvecs) = diag_sparse(construct_Hamiltonian(L = L, W = w, seed=seed))
+			ss = level_spacing(eigvals)
+			S.append(ss)
+		S = list(np.array(S).flatten())
+		s.append(S)
+	rs = []
+
+	for index,i in enumerate(s):
+		r= [min(i[j:j+2])/max(i[j:j+2]) for j in range(len(i)-1)]
+		rs.append(r)
+	if save==True:
+		np.savetxt('s{}.csv'.format(L), s, delimiter=',')
+		np.savetxt('r{}.csv'.format(L), rs, delimiter=',')
+
+	return (s,rs)
+
+
+def make_hist(s,ws):
+	colors = 'red, green, blue, orange, black'.split(', ')*8
+	plt.figure()
+	for index,i in enumerate(s):
+		sns.histplot(i, 
+			kde=False, color=colors[index], binwidth=.3,
+			stat="probability",
+			fill=False,  thresh=.3,
+			label='w={}'.format(ws[index]))
+	plt.title('P(s)')
+	plt.xlabel('level spacings, $s$')
+	plt.legend()
+	plt.savefig('../images/hist.png', dpi=300)
+
+
+def make_kde(s,ws):
+	colors = 'red, green, blue, orange, black'.split(', ')*9
+	plt.figure()
+	for index,i in enumerate(s):
+		sns.kdeplot(i, 
+			color=colors[index],
+			label='w={}'.format(ws[index]))
+	plt.title('P(s)')
+	plt.xlabel('level spacings, $s$')
+	plt.legend()
+	plt.savefig('../images/kde.png', dpi=300)
+
+def plot_r(ws,rs):
+	#plt.figure()
+	plt.plot(ws,[np.mean(r) for r in rs])
+	plt.ylabel('r')
+	plt.xlabel('w')
+	#plt.savefig('../images/r.png', dpi=300)	
+
+def load_r(filename):
+	r = np.loadtxt(filename, delimiter=',')
+	return r
+
+
+def time_to_run(Ls = [4,6,8,10,12,14], num_w=1, seeds=100):
+	data = ['L,ws,seeds,time'.split(',')]
+	for L in Ls:
+		startTime = datetime.now()
+		obtain_s_r(num_w,seeds,L)
+		time = (datetime.now() - startTime).total_seconds()
+		time = str(time)
+		#time = float(time)
+		data.append([L,num_w,seeds, time])
+	data = np.array(data)
+
+	np.savetxt('time_to_run.csv', data, delimiter=',')
+	print(data)
+
+
+
+num_w = 10
+ws = np.linspace(0.1,6,num_w)
+
+#for L in [8,10,12]:
+	#(s,r) = obtain_s_r(num_w=num_w,num_seeds=1000, L=L,save=True)
+
+#np.savetxt('ws.csv', ws, delimiter=',')
+
+
+
+#time_to_run()
+
 
 '''
-Ws = np.logspace(0,1,40)
-mean_level_spacings = []
-for W in Ws:
-	mls = construct_Hamiltonian(L,s2i,i2s, W, U, t)
-	mean_level_spacings.append(mls)
-print(Ws)
-print(mean_level_spacings)
-
-
-plt.figure(figsize=(12,6))
-plt.scatter(Ws, mean_level_spacings)
-plt.grid()
-plt.savefig('../images/mean_level_spacings.png',dpi=300)
+plot_r(ws,load_r('r8.csv'))
+plot_r(ws,load_r('r10.csv'))
+plot_r(ws,load_r('r12.csv'))
+plt.legend(['L=8','L=10','L=12'])
+plt.savefig('../images/rs.png', dpi=300)
 
 '''
+
+
