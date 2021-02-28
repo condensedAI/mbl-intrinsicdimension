@@ -1,6 +1,5 @@
 '''
 Author = Anton Golles
-Generating data for MBL
 '''
 
 from math import factorial
@@ -186,10 +185,11 @@ def benchmark(num_seeds=200, Lmax = 12):
 	methods, color = ['sparse', 'dense'], ['b', 'g']
 
 	for L in Ls:
-		print(L)
+		print('###########\n\n', L)
 		times_sparse = []
 		times_dense = []
 		for seed in range(20, num_seeds+20):
+			print(seed)
 			for method in methods:
 				startTime = datetime.now()
 				diag(constructHamiltonian(L=L, seed=seed, method=method))
@@ -233,49 +233,52 @@ def levelSpacing(eigvals):
 	s.append(abs(eigvals[len(eigvals)-1]-eigvals[0]))  # Periodic boundary
 	return s
 
-def obtain_s_r(num_w=4, num_seeds=10, L=[6,8,10], save=True, method='dense'):
+def obtain_s_r(num_w=4, disorder_realizations=10,
+	L=10,save=True, method='dense', low_w=0.2, high_w = 6):
 	'''
-	calculates the r-statistic 
-	______________
+	Builds hamiltonian to find r-statistic and level-spacing. 
+	Results may be saved.
+	_______________
 	Parameters:
-		num_w : number of values to use for w; int 
-		num_seeds : number of realizations of a given w; int
-		L : system sizes; list of ints divisible by 2
-		save : save files
-		method : build and diag Hamiltonian as either 'dense' or 'sparse'
-	______________
-	Saves:
-		(s,r) : levelspacings for each w, and r-statistic
-	______________
-	Returns:
-		its a procedure
+		num_w : number of disorder strengths; int 
+		disorder_realizations ; int
+		L : system size; int divisible by 2
+		save ; save results as csv; bolean
+		method : dense or sparse
+		low_w, high_w : low and high values from disorder strength.
+	_______________
+	returns: (r, s)
+		r : r statistic - a float of each site for each realization
+		s : eigenstate level spacings
 	'''
-	
 	ws = np.linspace(.2,6,num_w)
-	for L in Ls:
-		s = []
-		for w in ws:
-			print('W = ',w)
-			S = []
-			for seed in range(num_seeds):
-				S.apppend( levelSpacing(diag(constructHamiltonian(
-					L = L, 
-					W = w, 
-					seed=seed, 
-					method=method))))
-			S = list(np.array(S).flatten())
-			s.append(S)
-		rs = []
+	
+	# Build Hamiltonian, diag, find levelspacing
+	s = []
+	for w in ws:
+		print('W = ',w)
+		S = []
+		for seed in range(disorder_realizations):
+			S.append(levelSpacing(diag(constructHamiltonian(
+				L = L, W = w, seed=seed, method=method))))
 
-		for index,i in enumerate(s):
-			r= [min(i[j:j+2])/max(i[j:j+2]) for j in range(len(i)-1)]
-			rs.append(r)
-		if save==True:
-			np.savetxt('s{}.csv'.format(L), s, delimiter=',')
-			np.savetxt('r{}.csv'.format(L), rs, delimiter=',')
+		s.append(list(np.array(S).flatten()))
+	
+	# Determine r
+	r = []
+	for index,i in enumerate(s):
+		r_temp= [min(i[j:j+2])/max(i[j:j+2]) for j in range(len(i)-1)]
+		r.append(r_temp)
+
+	# Save
+	if save==True:
+		np.savetxt('s{}.csv'.format(L), s, delimiter=',')
+		np.savetxt('r{}.csv'.format(L), r, delimiter=',')
+		np.savetxt('w{}.csv'.format(L), ws, delimiter=',')
+		return None
+	else:
+		return (r, ws)
 
 def rLoad(filename):
 	r = np.loadtxt(filename, delimiter=',')
 	return r
-	
-
