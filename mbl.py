@@ -164,11 +164,11 @@ def diag(Hamiltonian):
 		eigenvalues
 	'''
 	try:
-		return np.linalg.eigh(Hamiltonian)
+		return np.linalg.eigh(Hamiltonian)[0]
 	except np.linalg.LinAlgError:
 		k = np.shape(Hamiltonian)[0]
-		eigvals,eigvecs =  linalg.eigsh(Hamiltonian, k= k-1)
-		return eigvals, evigvecs
+		eigvals =  linalg.eigsh(Hamiltonian, k= k-1)[0]
+		return eigvals
 
 def benchmark(num_seeds=200, Lmax = 12):
 	'''
