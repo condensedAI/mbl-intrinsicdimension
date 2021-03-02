@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.sparse import diags, spmatrix, linalg, save_npz, lil_matrix, csr_matrix
 from datetime import datetime
+from tqdm import tqdm
+import os
 
 def binaryConvert(x=5, L=4):
 	'''
@@ -164,11 +166,11 @@ def diag(Hamiltonian):
 		eigenvalues
 	'''
 	try:
-		return np.linalg.eigh(Hamiltonian)[0]
+		return np.linalg.eigh(Hamiltonian)
 	except np.linalg.LinAlgError:
 		k = np.shape(Hamiltonian)[0]
-		eigvals =  linalg.eigsh(Hamiltonian, k= k-1)[0]
-		return eigvals
+		eigvals, eigvecs =  linalg.eigsh(Hamiltonian, k= k-1)
+		return eigvals, eigvecs
 
 def benchmark(num_seeds=200, Lmax = 12):
 	'''
@@ -217,6 +219,44 @@ def benchmark(num_seeds=200, Lmax = 12):
 	plt.title('Benchmark run time, build+diag Hamiltonian, realizations = {}'.format(num_seeds))
 	plt.savefig('../images/benchmarks.png', dpi=300, transparent=True)
 
+def arrToString(arr):
+	a = str(arr).replace('[','').replace(']','').replace(' ',',').replace('\n',',').replace(',,', ',')
+	return a
+
+def buildnDiag(
+	method = 'dense',
+	L_high = 12,
+	disorder_realizations = 10,
+	disorders = 10,
+	):
+	for L in np.arange(8, L_high, 2): # System sizes
+		print('L =', L)
+		for w in tqdm(np.linspace(1,5,disorders)):
+			for seed in range(disorder_realizations):
+				H = constructHamiltonian(L = L, W = w, seed=seed, method=method)
+				eigvals, eigvecs = diag(H)
+				np.savez('results1/results-L-{}-W-{}-seed-{}.npz'.format(L, w, seed) ,eigvals, eigvecs)
+
+
+
+def load_eigs_npz(filename='results/results-L-2-W-0.1-seed-0.npz'):
+	data = np.load(filename)
+	eigvals = data[data.files[0]]
+	eigvecs = data[data.files[1]]
+
+	return eigvals, eigvecs
+
+def load_eigvals_npz(filename='results1/results-L-2-W-0.1-seed-0.npz'):
+	data = np.load(filename)
+	eigvals = data[data.files[0]]
+	return eigvals
+
+def load_eigvecs_npz(filename='results/results-L-2-W-0.1-seed-0.npz'):
+	data = np.load(filename)
+	eigvecs = data[data.files[1]]
+
+	return eigvecs
+
 def levelSpacing(eigvals):
 	'''
 	given eigenvalues, finds level spacing
@@ -233,52 +273,76 @@ def levelSpacing(eigvals):
 	s.append(abs(eigvals[len(eigvals)-1]-eigvals[0]))  # Periodic boundary
 	return s
 
-def obtain_s_r(num_w=4, disorder_realizations=10,
-	L=10,save=True, method='dense', low_w=0.2, high_w = 6):
-	'''
-	Builds hamiltonian to find r-statistic and level-spacing. 
-	Results may be saved.
-	_______________
-	Parameters:
-		num_w : number of disorder strengths; int 
-		disorder_realizations ; int
-		L : system size; int divisible by 2
-		save ; save results as csv; bolean
-		method : dense or sparse
-		low_w, high_w : low and high values from disorder strength.
-	_______________
-	returns: (r, s)
-		r : r statistic - a float of each site for each realization
-		s : eigenstate level spacings
-	'''
-	ws = np.linspace(.2,6,num_w)
-	
-	# Build Hamiltonian, diag, find levelspacing
-	s = []
-	for w in ws:
-		print('W = ',w)
-		S = []
-		for seed in range(disorder_realizations):
-			S.append(levelSpacing(diag(constructHamiltonian(
-				L = L, W = w, seed=seed, method=method))))
 
-		s.append(list(np.array(S).flatten()))
-	
-	# Determine r
-	r = []
-	for index,i in enumerate(s):
-		r_temp= [min(i[j:j+2])/max(i[j:j+2]) for j in range(len(i)-1)]
-		r.append(r_temp)
+def rStatFromFiles(
+	L_high = 6,
+	disorder_realizations = 10,
+	disorders = 10):
+	rs = []
+	for L in np.arange(4, L_high, 2): # System sizes
+		print(L)
+		r = []
+		for w in np.linspace(0.3,6,disorders):
+			if w < 1:
+				pass
+			else:
+				r_temp = []
+				for seed in range(disorder_realizations):
+					filename = os.path.expanduser("~/results1/results-L-{}-W-{}-seed-{}.npz".format(L, w, seed))
+					eigvals = load_eigvals_npz(filename)
+					level_spacings = levelSpacing(eigvals)
+					r_temp_temp = 0
+					length = len(level_spacings)
+					for i in range(length-1):
+						r_temp_temp += min(level_spacings[i:i+2])/max(level_spacings[i:i+2])
+					r_temp.append(r_temp_temp/length)
+				print(filename)
+				r.append(np.mean(r_temp))
+		rs.append(r)
+	return rs
 
-	# Save
-	if save==True:
-		np.savetxt('s{}.csv'.format(L), s, delimiter=',')
-		np.savetxt('r{}.csv'.format(L), r, delimiter=',')
-		np.savetxt('w{}.csv'.format(L), ws, delimiter=',')
-		return None
-	else:
-		return (r, ws)
+def rStatFromFiles_centerEigs(
+	L_high = 6,
+	disorder_realizations = 10,
+	disorders = 10,
+	location = '~/results1/'):
+	rs = []
+	for L in np.arange(4, L_high, 2): # System sizes
+		print(L)
+		r = []
+		for w in np.linspace(0.3,6,disorders):
+			if w < 1:
+				pass
+			else:
+				r_temp = []
+				for seed in range(disorder_realizations):
+					filename = os.path.expanduser("~/results1/results-L-{}-W-{}-seed-{}.npz".format(L, w, seed))
+					eigvals = load_eigvals_npz(filename)
+					level_spacings = levelSpacing(eigvals)
+					r_temp_temp = 0
+					length = len(level_spacings)
+					for i in range(int((length-1)//4),int(3*(length-1)//4)):
+						r_temp_temp += min(level_spacings[i:i+2])/max(level_spacings[i:i+2])
+					r_temp.append((r_temp_temp)/(length/2))
+				print(filename)
+				r.append(np.mean(r_temp))
+		rs.append(r)
+	return rs
 
-def rLoad(filename):
-	r = np.loadtxt(filename, delimiter=',')
-	return r
+
+
+def plotR(rs, L_high=14, disorders=17,name='2', title='eigs'):
+	for index, L in enumerate(np.arange(4,L_high,2)):
+		if L < 8:
+			pass
+		else:
+			plt.scatter(np.linspace(1.2,6,disorders), rs[index], label=L)
+
+	plt.legend()
+	plt.grid()
+	plt.title('r-statistic for different system sizes, {}'.format(title))
+	plt.xlabel('disorder strength, $w$')
+	plt.ylabel('r-statistic')
+
+	plt.savefig('r_test{}.png'.format(name),dpi=420)
+
