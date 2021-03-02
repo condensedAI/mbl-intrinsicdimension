@@ -10,7 +10,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from numpy import load
 from mbl import *
-buildnDiag(method ='dense', L_high=14, disorder_realizations=1000, disorders=20)
+buildnDiag(method ='dense', L_high=10, disorder_realizations=10, disorders=5)
 
 
 #rs = rStatFromFiles(L_high = 14,disorder_realizations = 1000, disorders = 20)
