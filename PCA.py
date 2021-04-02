@@ -12,7 +12,7 @@ def pca(data, n_components=2):
     #print('pca.explained_variance_ratio_',
     #      pca.explained_variance_ratio_, 'sum = ',
     #return sum(pca.explained_variance_ratio_)#, principalComponents
-    return principalComponents,sum(pca.explained_variance_ratio_)
+    return pca.explained_variance_ratio_
 
     
 def load_eigs_npz(filename='results/results-L-2-W-0.1-seed-0.npz'):
@@ -23,58 +23,64 @@ def load_eigs_npz(filename='results/results-L-2-W-0.1-seed-0.npz'):
     return eigvals, eigvecs.T
 
 def PCA_for_many():
-	L = int(input('L: '))
-	seeds = int(input("Number of seeds (disorder realizations): "))
-	print("disorder low, high, steps")
-	low = int(input("low: "))
-	high = int(input("high: "))
-	steps = int(input("steps:"))
+    L = int(input('L: '))
+    num_seeds = int(input("Number of seeds (disorder realizations): "))
+    print("disorder low, high, steps")
+    low = int(input("low: "))
+    high = int(input("high: "))
+    steps = int(input("steps:"))
 
 
-	plt.figure(figsize=(8,8))
+    plt.figure(figsize=(8,8))
 
-	Files = []
-
-
-	ws = np.linspace(low,high,steps)
-	seeds = np.arange(0,seeds,1)
-
-	for w in ws:
-		files = []
-		for seed in seeds:
-			file = 'data/results-L-{}-W-{}-seed-{}.npz'.format(L,round(w,2),seed)
-			files.append(file)
-		Files.append(files)
+    Files = []
 
 
-	eigs = []
-	for files in Files:
-		dd = []
-		for file in tqdm(files):
-			eigvals, eigvecs = load_eigs_npz(file)
-			data=eigvecs.flatten()
-			dd.append(data)
-		eigs.append(dd)
+    ws = np.linspace(low,high,steps)
+    seeds = np.arange(0,num_seeds,1)
+
+    for w in ws:
+        files = []
+        for seed in seeds:
+            file = 'data/results-L-{}-W-{}-seed-{}.npz'.format(L,round(w,2),seed)
+            files.append(file)
+        Files.append(files)
 
 
-	eigs = np.array(eigs)
-	print(np.shape(eigs))
-
-	for num_components in tqdm([1,2,5,10,15,25,40,60,100]):
-		exps = []
-		for i in eigs:
-			print(np.shape(i.T))
-			pc, exp = pca(i, num_components)
-			exps.append(exp)
-
-		plt.scatter(ws,exps, s=100, label=num_components)
-
-	plt.title('Variance in flattend eigenvectors explain by X PC')
-	plt.xlabel('Disorder strength, $W$')
-	plt.ylabel('Explained variance')
-	plt.legend()
-	plt.savefig('pca{}PC.png'.format(num_components))
+    eigs = []
+    for files in Files:
+        dd = []
+        for file in tqdm(files):
+            eigvals, eigvecs = load_eigs_npz(file)
+            data=eigvecs.flatten()
+            dd.append(data)
+        eigs.append(dd)
 
 
-PCA_for_many()
+    eigs = np.array(eigs)
+    print('Shape of the eigs', np.shape(eigs))
 
+   
+
+    num_components = 50
+    exps = []
+    for index, i in enumerate(eigs):
+        print(np.shape(i))
+        exp = pca(i, num_components)
+        #print(exp)
+        exps.append(exp)
+    
+
+    #plt.scatter(ws,exps, s=100, label=num_components)
+
+    #plt.title('Variance in flattend eigenvectors explain by X PC')
+    #plt.xlabel('Disorder strength, $W$')
+    #plt.ylabel('Explained variance')
+    #plt.legend()
+    #plt.savefig('pca{}PC.png'.format(num_components))
+    exp = np.array(exps)
+    
+    np.savez('pca_results_L{}_seeds{}_low{}_high_steps{}.npz'.format(L,num_seeds, low, high, steps), exp, ws)
+    
+
+EXPS = PCA_for_many()
