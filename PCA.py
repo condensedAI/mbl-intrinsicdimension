@@ -58,21 +58,22 @@ def PCA_for_many():
 
 
 	eigs = np.array(eigs)
+	print(np.shape(eigs))
 
-	for num_components in [1,2]:#,5,10,15,25,40,60,100]:
+	for num_components in tqdm([1,2,5,10,15,25,40,60,100]):
 		exps = []
 		for i in eigs:
 			print(np.shape(i.T))
 			pc, exp = pca(i, num_components)
 			exps.append(exp)
 
-		plt.scatter(ws,exps, color=colors[index], s=100, label=LL)
+		plt.scatter(ws,exps, s=100, label=num_components)
 
-		plt.title('Variance in flattend eigenvectors explain by {} PC'.format(num_components))
-		plt.xlabel('Disorder strength, $W$')
-		plt.ylabel('Explained variance')
-		plt.legend()
-		plt.savefig('pca{}PC.png'.format(num_components))
+	plt.title('Variance in flattend eigenvectors explain by X PC')
+	plt.xlabel('Disorder strength, $W$')
+	plt.ylabel('Explained variance')
+	plt.legend()
+	plt.savefig('pca{}PC.png'.format(num_components))
 
 
 PCA_for_many()
