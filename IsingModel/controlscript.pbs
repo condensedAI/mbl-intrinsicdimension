@@ -10,4 +10,4 @@ module load anaconda3/4.4.0
 
 cd $PBS_O_WORKDIR
 
-/usr/bin/time python3 run.py $output -L $L -N $N
+/usr/bin/time python3 run.py $output -L $L -N $N -T $T
