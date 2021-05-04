@@ -4,6 +4,9 @@ from math import factorial
 from tqdm import tqdm
 from scipy.spatial import distance_matrix
 import time
+from numba import jit
+
+@jit(nopython=True)
 
 
 def load_eigs_npz(filename='data/results-L-12-W-1.0-seed-42.npz'):
@@ -66,6 +69,14 @@ def load_many_eigs(Files):
 	eigs = np.array(eigs, dtype='object')
 	return eigs
 
+def dist_Matrix(data):
+	dist_matrix = np.zeros((N, N))
+	# Making the distance matrix: distance from each eigvec to all others
+	for i, eigvec1 in enumerate(data):
+		for j, eigvec2 in enumerate(data):	
+			distance = sum(abs((eigvec1-eigvec2)))
+			dist_matrix[i,j], dist_matrix[j,i] = distance, distance
+	return dist_matrix
 
 
 def nn2(
@@ -89,25 +100,13 @@ def nn2(
 		m : Slope
 	
 	'''
-	
-
-	print(np.shape(data))
 	N = len(data)
 	starttime = time.time()
-	dist_matrix = np.zeros((N, N))
-	# Making the distance matrix: distance from each eigvec to all others
-	for i, eigvec1 in enumerate(data):
-		for j, eigvec2 in enumerate(data):
-			if j <= i:
-				pass
-			else:
-				distance = sum(abs((eigvec1-eigvec2)))
-				dist_matrix[i,j], dist_matrix[j,i] = distance, distance
-		#print(dist_matrix) # To see how it fills √
+	dist_M = dist_Matrix(data)
 	print("Old Distance matrix took %.5f seconds"%(time.time() - starttime))	
-	starttime = time.time()
-	dist_M = distance_matrix(data,data, p=1)
-	print("New dist took %.5f seconds"%(time.time() - starttime))
+	#starttime = time.time()
+	#dist_M = distance_matrix(data,data, p=1)
+	#print("New dist took %.5f seconds"%(time.time() - starttime))
 	# table of distances - state and \mu= r_2/r_1
 	mu = np.zeros((N,2))
 	for index, line in enumerate(dist_M):
