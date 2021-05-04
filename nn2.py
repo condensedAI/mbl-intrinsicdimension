@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import factorial
 from tqdm import tqdm
+from scipy.spatial import distance_matrix
 
 
 
@@ -90,7 +91,7 @@ def nn2(
 	'''
 
 	N = len(data)
-	
+	'''
 	distance_matrix = np.zeros((N, N))
 	# Making the distance matrix: distance from each eigvec to all others
 	for i, eigvec1 in enumerate(data):
@@ -101,6 +102,8 @@ def nn2(
 				distance = sum(abs((eigvec1-eigvec2)))
 				distance_matrix[i,j], distance_matrix[j,i] = distance, distance
 		#print(distance_matrix) # To see how it fills √
+	'''
+	distance_matrix = distance_matrix(data,data)
 
 	# table of distances - state and \mu= r_2/r_1
 	mu = np.zeros((N,2))
@@ -180,4 +183,4 @@ IDs = get_intrinsic_dims(eigs)
 
 #print(IDs)
 
-np.savez('results/nn2_results_L{}_seeds{}_low{}_high_steps{}.npz'.format(L,num_seeds, low, high, steps), IDs, ws)
+np.savez('results/nn2_results_L{}_seeds{}_low{}_high_steps{}_new.npz'.format(L,num_seeds, low, high, steps), IDs, ws)
