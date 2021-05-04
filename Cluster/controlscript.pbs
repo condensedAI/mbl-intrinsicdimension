@@ -7,8 +7,8 @@
 
 ## Load all required modules for the job
 module load tools
-module load anaconda3/4.4.0
+module load anaconda3/2020.07
 
 cd $PBS_O_WORKDIR
 
-/usr/bin/time python3 run.py $output -L $L -S $S -W $W
+/usr/bin/time python3 run.py $output -L $L -S $S
