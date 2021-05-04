@@ -2,9 +2,9 @@ from nn2_cluster import *
 import argparse
 
 
-def run(L, ws, seed,):
+def run(L, seed,):
     # List filenames
-    filenames = listFilenames(L=10,ws=[1.0,1.44], seed=0)
+    filenames = listFilenames(L=10, seed=0)
 
     # Get eigencevtors
     eigenvectors = load_many_eigs(filenames)
@@ -12,14 +12,13 @@ def run(L, ws, seed,):
     # Perform 2nn
     IDs = [nn2(eigs) for eigs in eigenvectors]
 
-    #np.save(output + '/%d-%.5f' % (L, T), res, allow_pickle=True)
+    np.save(output + '/%d-%.5f' % (L, T), res, allow_pickle=True)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run 2NN on Hubbard chain Eigenvectors")
     parser.add_argument('output', type=str, help='Output folder of the files')
     parser.add_argument('-L', type=int, default=10, help='The system size (L)')
-    parser.add_argument('-W', type=list, default=20000, help='The disorders')
     parser.add_argument('-S', type=int, help='The seed number')
     args = parser.parse_args()
 
