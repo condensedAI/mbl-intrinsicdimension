@@ -48,9 +48,9 @@ def PCA_for_many():
 
 
     eigs = []
-    for files in Files:
+    for files in tqdm(Files):
         dd = []
-        for file in tqdm(files):
+        for file in files:
             eigvals, eigvecs = load_eigs_npz(file)
             data=eigvecs.flatten()
             dd.append(data)
@@ -62,10 +62,10 @@ def PCA_for_many():
 
    
 
-    num_components = 50
+    num_components = num_seeds -1
     exps = []
-    for index, i in enumerate(eigs):
-        print(np.shape(i))
+    for i in tqdm(eigs):
+        #print(np.shape(i))
         exp = pca(i, num_components)
         #print(exp)
         exps.append(exp)
@@ -80,7 +80,7 @@ def PCA_for_many():
     #plt.savefig('pca{}PC.png'.format(num_components))
     exp = np.array(exps)
     
-    np.savez('pca_results_L{}_seeds{}_low{}_high_steps{}.npz'.format(L,num_seeds, low, high, steps), exp, ws)
+    np.savez('results/pca_results_L{}_seeds{}_low{}_high{}_steps{}.npz'.format(L,num_seeds, low, high, steps), exp, ws)
     
 
 EXPS = PCA_for_many()
