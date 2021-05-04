@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from math import factorial
 from tqdm import tqdm
 from scipy.spatial import distance_matrix
-
+import time
 
 
 def load_eigs_npz(filename='data/results-L-12-W-1.0-seed-42.npz'):
@@ -89,10 +89,12 @@ def nn2(
 		m : Slope
 	
 	'''
+	
 
+	print(np.shape(data))
 	N = len(data)
-	'''
-	distance_matrix = np.zeros((N, N))
+	starttime = time.time()
+	dist_matrix = np.zeros((N, N))
 	# Making the distance matrix: distance from each eigvec to all others
 	for i, eigvec1 in enumerate(data):
 		for j, eigvec2 in enumerate(data):
@@ -100,14 +102,15 @@ def nn2(
 				pass
 			else:
 				distance = sum(abs((eigvec1-eigvec2)))
-				distance_matrix[i,j], distance_matrix[j,i] = distance, distance
-		#print(distance_matrix) # To see how it fills √
-	'''
-	distance_matrix = distance_matrix(data,data)
-
+				dist_matrix[i,j], dist_matrix[j,i] = distance, distance
+		#print(dist_matrix) # To see how it fills √
+	print("Old Distance matrix took %.5f seconds"%(time.time() - starttime))	
+	starttime = time.time()
+	dist_M = distance_matrix(data,data, p=1)
+	print("New dist took %.5f seconds"%(time.time() - starttime))
 	# table of distances - state and \mu= r_2/r_1
 	mu = np.zeros((N,2))
-	for index, line in enumerate(distance_matrix):
+	for index, line in enumerate(dist_M):
 		r1, r2 = sorted(line)[1:3]
 		mu[index,0] = index+1
 		mu[index,1] = r2/r1
@@ -156,7 +159,7 @@ def get_intrinsic_dims(eigs):
 		intrinsic_dim_L = []
 		for eig in tqdm(eig_L):
 			intrinsic_dim = []
-			for data in eig:
+			for data in tqdm(eig):
 				d= nn2(data)
 				intrinsic_dim.append(d)
 			intrinsic_dim_L.append(intrinsic_dim)
