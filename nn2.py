@@ -178,4 +178,6 @@ filenames, ws, Ls = listFilenames(Ls=[L],
 eigs = load_many_eigs(filenames)
 IDs = get_intrinsic_dims(eigs)
 
-print(IDs)
+#print(IDs)
+
+np.savez('results/nn2_results_L{}_seeds{}_low{}_high_steps{}.npz'.format(L,num_seeds, low, high, steps), IDs, ws)
