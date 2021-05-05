@@ -1,5 +1,5 @@
 #!/bin/bash
-savedir="/home/projects/ku_00067/scratch/mbl-intrinsicdimension/results_NEW/"
+savedir="../results_NEW/"
 
 
 for i in `seq 0 20`
