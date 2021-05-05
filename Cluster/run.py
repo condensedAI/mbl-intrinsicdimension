@@ -4,7 +4,7 @@ import argparse
 
 def run(L, seed):
     # List filenames
-    filenames = listFilenames(L=10, seed=0)
+    filenames = listFilenames(L=12, seed=0)
 
     # Get eigencevtors
     eigenvectors = load_many_eigs(filenames)
