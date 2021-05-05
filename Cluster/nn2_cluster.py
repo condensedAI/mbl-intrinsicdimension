@@ -9,7 +9,7 @@ def load_eigs_npz(filename='data/results-L-12-W-1.0-seed-42.npz'):
 	eigvecs = data[data.files[1]]
 	return eigvecs.T
 
-def listFilenames(L = 10,
+def listFilenames(L = 12,
 				  ws = [1.0, 1.45, 1.91, 2.36, 2.82, 3.27, 3.73, 4.18, 4.64, 5.09, 5.55, 6.0],
 				   seed = 0):
 	files = ['../data/results-L-{}-W-{}-seed-{}.npz'.format(L,round(w,2),seed) for w in ws]
