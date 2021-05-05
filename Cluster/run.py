@@ -18,7 +18,7 @@ def run(L, seed):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run 2NN on Hubbard chain Eigenvectors")
     parser.add_argument('output', type=str, help='Output folder of the files')
-    parser.add_argument('-L', type=int, default=10, help='The system size (L)')
+    parser.add_argument('-L', type=int, default=12, help='The system size (L)')
     parser.add_argument('-S', type=int, help='The seed number')
     args = parser.parse_args()
 
