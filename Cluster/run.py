@@ -2,7 +2,7 @@ from nn2_cluster import *
 import argparse
 
 
-def run(L, seed,):
+def run(L, seed):
     # List filenames
     filenames = listFilenames(L=10, seed=0)
 
@@ -12,7 +12,7 @@ def run(L, seed,):
     # Perform 2nn
     IDs = [nn2(eigs) for eigs in eigenvectors]
 
-    np.save(output + '/%d-%.5f' % (L, T), res, allow_pickle=True)
+    np.save(output + '/%d-%.5f' % (L, S), res, allow_pickle=True)
 
 
 if __name__ == '__main__':
@@ -28,4 +28,4 @@ if __name__ == '__main__':
     except:
         print("Directory '%s' could not be created" % args.output)
 
-    run(args.L, args.W, args.S)
+    run(args.L, args.S)
