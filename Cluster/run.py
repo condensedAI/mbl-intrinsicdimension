@@ -5,7 +5,7 @@ import numpy as np
 
 def run(L, seed, output):
     # List filenames
-    filenames = listFilenames(L=12, seed=seed)
+    filenames = listFilenames(L=14, seed=seed)
 
     # Get eigencevtors
     eigenvectors = load_many_eigs(filenames)
