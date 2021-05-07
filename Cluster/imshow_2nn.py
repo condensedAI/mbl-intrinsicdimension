@@ -5,7 +5,7 @@ path = "/home/projects/ku_00067/scratch/mbl-intrinsicdimension/results_NEW/"
 
 L = 12
 
-data = 
+data = []
 
 for seed in range(100):
 	data_1_file = np.load(path+{}-{}.format(L, seed))
