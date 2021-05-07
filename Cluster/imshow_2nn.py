@@ -15,4 +15,4 @@ for seed in range(100):
 data = np.array(data).T
 print(data)
 plt.imshow(data)
-plt.savefig("nn2_out.png", dpi=500)
+plt.savefig("nn2_output0.png", dpi=500)
