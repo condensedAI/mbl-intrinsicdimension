@@ -63,4 +63,4 @@ plt.ylabel('Intrinsic dimension')
 
 plt.legend()
 
-plt.savefig('2nn_mean.png', dpi=500)
+plt.savefig('2nn_mean_12_14.png', dpi=500)
