@@ -12,7 +12,7 @@ def run(L, seed):
     # Perform 2nn
     IDs = [nn2(eigs) for eigs in eigenvectors]
 
-    np.save(output + '/%d-%.5f' % (L, S), res, allow_pickle=True)
+    np.save(output + '/%d-%d' % (L, seed), IDs, allow_pickle=True)
 
 
 if __name__ == '__main__':
