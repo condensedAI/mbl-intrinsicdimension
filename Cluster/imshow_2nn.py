@@ -28,8 +28,8 @@ ax = fig.add_subplot(111)
 ax.imshow(data, extent=[0,1000,1,7])
 forceAspect(ax,aspect=4)
 
-fig.suptitle("nn2_output-L-{}-seeds-{}_1.png".format(L, seed+1), fontsize=16)
-fig.savefig("2NN output; L={}, seeds={}".format(L, seed+1), dpi=500, bbox_inches='tight')
+fig.suptitle("2NN output;L={}, seeds={}_1".format(L, seed+1), fontsize=16)
+fig.savefig("nn2_output_L_{}_seeds_{}.png".format(L, seed+1), dpi=500, bbox_inches='tight')
 
 
 x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
