@@ -11,5 +11,8 @@ for seed in range(100):
 	data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
 	data.append(data_1_file)
 
+
+data = np.array(data)
+print(data)
 plt.imshow(data)
 plt.savefig("nn2_out.png", dpi=500)
