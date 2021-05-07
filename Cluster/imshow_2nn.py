@@ -32,14 +32,21 @@ fig.suptitle("2NN output;L={}, seeds={}_1".format(L, seed+1), fontsize=16)
 fig.savefig("nn2_output_L_{}_seeds_{}.png".format(L, seed+1), dpi=500, bbox_inches='tight')
 
 
-x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
-y = np.mean(data, axis=1)
-std = np.std(data, axis=1)
-plt.figure(figsize=(12,6))
-plt.plot(x,y, label='L={}'.format(L), c='r')
-plt.scatter(x,y, c='r')
-plt.plot(x,y+std, ls='--', c='orange')
-plt.plot(x,y-std, ls='--', c='orange')
+
+
+Ls = [12,14]
+color1 = ['red', 'green']
+color2 = ['salmon', 'lightgreen']
+for L,c1,c2 in zip(Ls, color1, color2):
+
+	x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
+	y = np.mean(data, axis=1)
+	std = np.std(data, axis=1)
+	plt.figure(figsize=(12,6))
+	plt.plot(x,y, label='L={}'.format(L), c='r')
+	plt.scatter(x,y, c=c1)
+	plt.plot(x,y+std, ls='--', c=c2)
+	plt.plot(x,y-std, ls='--', c=c2)
 
 plt.title('Mean result from 2nn')
 plt.xlabel('disorder strength, $W$')
