@@ -25,8 +25,9 @@ if __name__ == '__main__':
     # Make sure the output directory exists
     try:
         os.makedirs(args.output, exist_ok = True)
-        run(args.L, args.S)
     except:
         print("Directory '%s' could not be created" % args.output)
+    
+    run(args.L, args.S)
 
     
