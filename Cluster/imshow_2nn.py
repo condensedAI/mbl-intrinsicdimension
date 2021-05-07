@@ -12,7 +12,7 @@ for seed in range(100):
 	data.append(data_1_file)
 
 
-data = np.array(data)
+data = np.array(data).T
 print(data)
 plt.imshow(data)
 plt.savefig("nn2_out.png", dpi=500)
