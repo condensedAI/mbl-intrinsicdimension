@@ -1,6 +1,7 @@
 from nn2_cluster import *
 import argparse
 import os
+import numpy as np
 
 def run(L, seed):
     # List filenames
