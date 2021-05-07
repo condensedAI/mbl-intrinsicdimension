@@ -15,10 +15,24 @@ for seed in range(1000):
 data = np.array(data).T
 print(data)
 
-plt.figure(figsize=(5,10))
+plt.figure(figsize=(10,2))
 plt.imshow(data)
-plt.savefig("nn2_output-L-{}-seeds-{}.png".format(L, seed+1), dpi=500)
 plt.xlabel('Seed number')
 plt.ylabel("disorder")
 plt.yticks(range(12),[1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0])
-plt.title("nn2_output-L-{}-seeds-{}.png".format(L, seed+1))
+plt.title("nn2_output-L-{}-seeds-{}_1.png".format(L, seed+1))
+plt.savefig("nn2_output-L-{}-seeds-{}.png".format(L, seed+1), dpi=500)
+
+
+x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
+y = np.mean(data, axis=1)
+print(y)
+plt.figure(figsize=(12,6))
+plt.plot(x,y)
+plt.scatter(x,y)
+plt.title('Mean result from 2nn')
+plt.xlabel('disorder strength, $W$')
+plt.ylabel('Intrinsic dimension')
+
+
+plt.savefig('2nn_mean.png', dpi=500)
