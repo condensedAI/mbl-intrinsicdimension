@@ -10,7 +10,7 @@ def load_eigs_npz(filename='data/results-L-12-W-1.0-seed-42.npz'):
 	return eigvecs.T
 
 def listFilenames(L = 12,
-				  ws = [1.0, 1.55, 2.09, 2.64, 2.82, 3.18, 3.73, 4.27, 4.82,5.36, 5.91, 6.45, 7.0],
+				  ws = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82,5.36, 5.91, 6.45, 7.0],
 				   seed = 0):
 	files = ['/home/projects/ku_00067/scratch/mbl-intrinsicdimension/data/results-L-{}-W-{}-seed-{}.npz'.format(L,round(w,2),seed) for w in ws]
 	
