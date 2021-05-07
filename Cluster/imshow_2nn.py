@@ -38,6 +38,15 @@ Ls = [12,14]
 color1 = ['red', 'green']
 color2 = ['salmon', 'lightgreen']
 for L,c1,c2 in zip(Ls, color1, color2):
+	data = []
+
+	for seed in range(1000):
+		data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
+		data.append(data_1_file)
+
+
+	data = np.array(data).T
+	print(data)
 
 	x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
 	y = np.mean(data, axis=1)
