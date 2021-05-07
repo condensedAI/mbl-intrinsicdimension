@@ -3,7 +3,7 @@ import argparse
 import os
 import numpy as np
 
-def run(L, seed):
+def run(L, seed, output):
     # List filenames
     filenames = listFilenames(L=12, seed=0)
 
@@ -29,6 +29,6 @@ if __name__ == '__main__':
     except:
         print("Directory '%s' could not be created" % args.output)
     
-    run(args.L, args.S)
+    run(args.L, args.S, args.output)
 
     
