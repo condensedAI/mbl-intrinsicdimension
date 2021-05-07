@@ -8,7 +8,7 @@ L = 12
 data = []
 
 for seed in range(100):
-	data_1_file = np.load(path+'{}-{}'.format(L, seed))
+	data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
 	data.append(data_1_file)
 
 plt.imshow(data)
