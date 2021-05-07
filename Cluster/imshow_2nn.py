@@ -36,7 +36,7 @@ x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
 y = np.mean(data, axis=1)
 std = np.std(data, axis=1)
 plt.figure(figsize=(12,6))
-plt.plot(x,y, label='L='.format(L), c='r')
+plt.plot(x,y, label='L={}'.format(L), c='r')
 plt.scatter(x,y, c='r')
 plt.plot(x,y+std, ls='--', c='orange')
 plt.plot(x,y-std, ls='--', c='orange')
