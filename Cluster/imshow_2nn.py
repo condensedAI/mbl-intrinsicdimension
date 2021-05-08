@@ -25,7 +25,7 @@ def forceAspect(ax,aspect):
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-ax.imshow(data, extent=[0,1000,1,7])
+ax.imshow(data, extent=[0,1000,7,1])
 forceAspect(ax,aspect=4)
 
 fig.suptitle("2NN output;L={}, seeds={}_1".format(L, seed+1), fontsize=16)
@@ -41,9 +41,11 @@ for L,c1,c2 in zip(Ls, color1, color2):
 	data = []
 
 	for seed in range(1000):
-		data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
-		data.append(data_1_file)
-
+		try:
+			data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
+			data.append(data_1_file)
+		except: 
+			pass
 
 	data = np.array(data).T
 	print(data)
@@ -64,3 +66,4 @@ plt.ylabel('Intrinsic dimension')
 plt.legend()
 
 plt.savefig('2nn_mean_12_14_1.png', dpi=500)
+ 
