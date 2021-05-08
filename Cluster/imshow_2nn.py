@@ -13,7 +13,7 @@ for seed in range(1000):
 
 
 data = np.array(data).T
-print(data)
+#print(data)
 
 
 
@@ -48,10 +48,11 @@ for L,c1,c2 in zip(Ls, color1, color2):
 			pass
 
 	data = np.array(data).T
-	print(data)
+	print('L=',L, data[0])
 
 	x = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
 	y = np.mean(data, axis=1)
+	print(y)
 	std = np.std(data, axis=1)
 	plt.figure(figsize=(12,6))
 	plt.plot(x,y, label='L={}'.format(L), c='r')
@@ -65,5 +66,5 @@ plt.ylabel('Intrinsic dimension')
 
 plt.legend()
 
-plt.savefig('2nn_mean_12_14_1.png', dpi=500)
+plt.savefig('2nn_mean_12_14_may8.png', dpi=500)
  
