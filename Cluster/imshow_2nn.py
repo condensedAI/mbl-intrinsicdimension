@@ -30,7 +30,7 @@ forceAspect(ax,aspect=4)
 
 fig.suptitle("2NN output;L={}, seeds={}_1".format(L, seed+1), fontsize=16)
 fig.savefig("nn2_output_L_{}_seeds_{}.png".format(L, seed+1), dpi=500, bbox_inches='tight')
-
+np.savez('2nn_12_1000.npz', data)
 
 
 
