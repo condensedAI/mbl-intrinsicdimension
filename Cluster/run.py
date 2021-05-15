@@ -4,17 +4,21 @@ import os
 import numpy as np
 
 def run(L, seed, output):
-    # List filenames
-    filenames = listFilenames(L=L, seed=seed)
+    try:
+        np.load(output + '/%d-%d' % (L, seed))
+        print('File already exists', L, seed)
+    except:
+        # List filenames
+        filenames = listFilenames(L=L, seed=seed)
 
-    # Get eigencevtors
-    eigenvectors = load_many_eigs(filenames)
+        # Get eigencevtors
+        eigenvectors = load_many_eigs(filenames)
 
-    # Perform 2nn
-    IDs = [nn2(eigs) for eigs in eigenvectors]
+        # Perform 2nn
+        IDs = [nn2(eigs) for eigs in eigenvectors]
 
-    np.save(output + '/%d-%d' % (L, seed), IDs, allow_pickle=True)
-
+        np.save(output + '/%d-%d' % (L, seed), IDs, allow_pickle=True)
+        print('Done')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run 2NN on Hubbard chain Eigenvectors")

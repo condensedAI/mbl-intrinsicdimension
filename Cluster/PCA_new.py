@@ -20,15 +20,15 @@ def file_path(L,w,seed):
     return '/home/projects/ku_00067/scratch/mbl-intrinsicdimension/data/results-L-{}-W-{}-seed-{}.npz'.format(L,w,seed)  
 
 
-Ls = [10,12]
+Ls = [12]
 ws = [1.0, 1.55, 2.09, 2.64, 3.18, 3.73, 4.27, 4.82, 5.36, 5.91, 6.45, 7.0]
-seeds = np.arange(0,60,1)
+seeds = np.arange(0,1000,1)
 
 exp_var_many = np.zeros((len(Ls),len(ws)))
 for index0, L in enumerate(Ls):
     for index1, w in enumerate(tqdm(ws)):
-        X = np.array([load_eigs_npz(file_path(L, w,seed), what='vecs') for seed in seeds])
+        X = np.array([load_eigs_npz(file_path(L, w,seed), what='vecs') for seed in seeds]).T
         exp_var = pca(X, n_components=L)
         exp_var_many[index0,index1] = sum(exp_var)
 
-np.savez('exp_var_many.npz', exp_var_many)
+np.savez('exp_var_many_{}_{}_T.npz'.format(L,max(seeds)+1), exp_var_many)
