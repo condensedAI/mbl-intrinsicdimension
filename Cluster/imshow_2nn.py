@@ -3,13 +3,16 @@ import matplotlib.pyplot as plt
 
 path = "/home/projects/ku_00067/scratch/mbl-intrinsicdimension/results_NEW/"
 
-L = 12
+L = 14
 
 data = []
 
 for seed in range(1000):
-	data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
-	data.append(data_1_file)
+	try:
+		data_1_file = np.load(path+'{}-{}.npy'.format(L, seed))
+		data.append(data_1_file)
+	except:
+		pass
 
 
 data = np.array(data).T
@@ -30,7 +33,7 @@ forceAspect(ax,aspect=4)
 
 fig.suptitle("2NN output;L={}, seeds={}_1".format(L, seed+1), fontsize=16)
 fig.savefig("nn2_output_L_{}_seeds_{}.png".format(L, seed+1), dpi=500, bbox_inches='tight')
-np.savez('2nn_12_1000.npz', data)
+np.savez('2nn_14_1000.npz', data)
 
 
 
