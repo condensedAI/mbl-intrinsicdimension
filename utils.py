@@ -332,17 +332,17 @@ def nn2(data, plot=False, return_xy = False,eps=.01, xshift=False, del_vals=2):
     x = x[y>0]
     y = y[y>0]
     
-    indices = np.argsort(x)
-    print(indices)
-    print(indices[-del_vals:])
-    x = x[indices[:-del_vals]]
-    y = y[indices[:-del_vals]]
-    x2 = x[indices[-del_vals:]]
-    y2 = y[indices[-del_vals:]]
+    #indices = np.argsort(x)
+    #print(indices)
+    #print(indices[-del_vals:])
+    #x = x[indices[:-del_vals]]
+    #y = y[indices[:-del_vals]]
+    #x2 = x[indices[-del_vals:]]
+    #y2 = y[indices[-del_vals:]]
 	
 
     y = -1*np.log(y)
-    y2 = -1*np.log(y2)
+    #y2 = -1*np.log(y2)
 	
     #fit line through origin to get the dimension
     d = np.linalg.lstsq(np.vstack([x, np.zeros(len(x))]).T, y, rcond=None)[0][0]
@@ -358,6 +358,6 @@ def nn2(data, plot=False, return_xy = False,eps=.01, xshift=False, del_vals=2):
         
             
     if return_xy:
-        return x,y, d,x2,y2
+        return x,y, d#,x2,y2
     else:
         return d
