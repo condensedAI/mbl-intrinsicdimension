@@ -7,7 +7,7 @@ def run(L, first_seed, output):
     # Perform 2nn
     IDs = nn2_new(L, first_seed)
 
-    np.save(output + '/%d-%d' % (L, first_seed), IDs, allow_pickle=True)
+    np.save(output + '2nn-%d-%d' % (L, first_seed), IDs, allow_pickle=True)
     print('Done')
 
 if __name__ == '__main__':
