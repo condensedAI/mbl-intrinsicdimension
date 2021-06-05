@@ -5,7 +5,11 @@ import numpy as np
 
 def run(L, first_seed, output):
     # Perform 2nn
-    IDs = nn2_new(L, first_seed)
+    if L < 12:
+        single = False
+    else:
+        single = True
+    IDs = nn2_new(L, first_seed, single)
 
     np.save(output + '2nn-%d-%d' % (L, first_seed), IDs, allow_pickle=True)
     print('Done')
