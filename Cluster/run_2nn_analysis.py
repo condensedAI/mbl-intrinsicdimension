@@ -34,5 +34,3 @@ if __name__ == '__main__':
         print("Directory '%s' could not be created" % args.output)
     
     run(args.L, args.S, args.output)
-
-    
