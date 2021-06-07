@@ -1,62 +1,57 @@
 import numpy as np
 from utils import level_spaces, r_stat
 
-def R(L=10,seeds=10000, single=False):
-
+def R(L=10,seeds=100, first_seed=0):
 	Ws = np.linspace(0.1,6.1,31)
+	R = {}
+	for W in Ws:
+			W = round(W,1)
+			R[W] = {}
 
-	R_main = []
-	R_std_main = []
-	if single == False:
-		for first_seed in np.arange(0,seeds,100):
-			last_seed = first_seed + 99
+	if L < 11:
+		for first_seed in np.arange(0,seeds,100): # step Truough seeds
+			try:
+				last_seed = first_seed + 99
 
-			filename = '/home/projects/ku_00067/scratch/mbl-intrinsicdimension/fulldataset/L-{}/eigvecs-and-eigvals-L-{}-seeds-{}-{}.npy'.format(L,L,first_seed, last_seed)
-			data = np.load(filename, allow_pickle=True)
+				filename = '/home/projects/ku_00067/scratch/mbl-intrinsicdimension/fulldataset/L-{}/eigvecs-and-eigvals-L-{}-seeds-{}-{}.npy'.format(L,L,first_seed, last_seed)
+				data = np.load(filename, allow_pickle=True)  # Contains 99*31*2 entries
+				for index1, seed in enumerate(np.arange(first_seed, last_seed)):
+					for index2, W in enumerate(Ws):
+						eigs = data.item()[seed][round(W,1)]['eigvals']
+						R[round(W,1)][seed] = r_stat(eigs)
+			except:
+				print('file could not be loaded:', filename)
+				pass
 
-			seeds = np.arange(first_seed, last_seed)
-			vals_or_vecs = 'eigvals'
-
-			R = np.zeros((99,len(Ws)))
-			R_std = np.zeros((99,len(Ws)))
-			for index1, seed in enumerate(seeds):
-				for index2, W in enumerate(Ws):
-					W = round(W,1)
-					eigs = data.item()[seed][W][vals_or_vecs]
-					r = r_stat(eigs)
-					R[index1,index2] = np.mean(r)
-					R_std[index1,index2] = np.std(r)
-
-
-			R_main.append(np.mean(R,axis=0))
-			R_std_main.append(np.mean(R_std**2,axis=0)**.5)	
-	
-	
-		R, std = np.array(R_main), np.array(R_std_main)
-		r = np.mean(R, axis=0)
-		std = np.mean(std**2, axis=0)**.5
-
-
-
-	else:
-		for seed in range(seeds):
+	elif L < 15:
+		for seed in np.arange(first_seed,first_seed+seeds,1):
 			try:
 				filename = '/home/projects/ku_00067/scratch/mbl-intrinsicdimension/fulldataset/L-{}/eigvecs-and-eigvals-L-{}-seed-{}.npy'.format(L,L,seed)
 				data = np.load(filename, allow_pickle=True)
-				R = np.zeros(len(Ws))
-				R_std = np.zeros(len(Ws))
 				for index2, W in enumerate(Ws):
 					W = round(W,1)
-					eigs = data.item()[W][vals_or_vecs]
-					r = r_stat(eigs)
-					R[index2] = np.mean(r)
-					R_std[index2] = np.std(r)
-				R_main.append(np.mean(R,axis=0))
-				R_std_main.append(np.mean(R_std**2,axis=0)**.5)
+					eigs = data.item()[W]['eigvals']
+					R[round(W,1)][seed] = r_stat(eigs)
 			except:
-				pass
+				print('Not found:',filename)
+	else:
 
-		R, std = np.array(R_main), np.array(R_std_main)
-		r = np.mean(R, axis=0)
-		std = np.mean(std**2, axis=0)**.5
-	np.savez('fullresults/R_stat_L{}.npz'.format(L), [r,std])					
+		for W in Ws:
+			filename = '/home/projects/ku_00067/scratch/mbl-intrinsicdimension/fulldataset/L-{}/eigvecs-and-eigvals-L-{}-W-{}-seed-{}.npy'.format(L,L,W,first_seed)
+			W = round(W,1)
+			try:
+				data = np.load(filename, allow_pickle=True)
+				print(data.item().keys())
+				eigs = data.item()[W]['eigvals']
+				R[W] = np.mean(r_stat(eigs))
+			except:
+				R[W]=None
+		return R
+
+	print(R)
+	R_means = {}
+	for W in Ws:
+		W = round(W,1)
+		R_means[W] = np.mean(list(R[W].values()))
+	print(R_means)
+	return R_means

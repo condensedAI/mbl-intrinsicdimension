@@ -3,13 +3,9 @@ import argparse
 import os
 import numpy as np
 
-def run(L, seeds, first_seed):
-	if L < 11:
-		single = False
-		R(L,seeds,single)
-	else:
-		single = True
-		R(L,seeds,single, first_seed)
+def run(L, seeds, first_seed, output):
+	R = R(L,seeds, first_seed)
+	np.savez(output+'R_stat_L{}_s{}-{}.npz'.format(L, first_seed, first_seed+seeds), R)
 		
 
 if __name__ == '__main__':
@@ -26,6 +22,6 @@ if __name__ == '__main__':
 	except:
 		print("Directory '%s' could not be created" % args.output)
     
-	run(args.L, args.S, args.K)
+	run(args.L, args.S, args.K, args.output)
 
     
