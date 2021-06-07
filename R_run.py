@@ -4,8 +4,8 @@ import os
 import numpy as np
 
 def run(L, seeds, first_seed, output):
-	R = R(L,seeds, first_seed)
-	np.savez(output+'R_stat_L{}_s{}-{}.npz'.format(L, first_seed, first_seed+seeds), R)
+	R_means = Rstats(L,seeds, first_seed)
+	np.savez(output+'R_stat_L{}_s{}-{}.npz'.format(L, first_seed, first_seed+seeds), R_means)
 		
 
 if __name__ == '__main__':
