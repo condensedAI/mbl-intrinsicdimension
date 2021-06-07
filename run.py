@@ -4,12 +4,7 @@ import os
 import numpy as np
 
 def run(L, first_seed, output):
-    # Perform 2nn
-    if L < 12:
-        single = False
-    else:
-        single = True
-    IDs = nn2_new(L, first_seed, single)
+    IDs = nn2_new(L, first_seed)
 
     np.save(output + '2nn-%d-%d' % (L, first_seed), IDs, allow_pickle=True)
     print('Done')
