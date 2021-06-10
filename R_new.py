@@ -1,7 +1,7 @@
 import numpy as np
 from utils import level_spaces, r_stat
 
-def R(L=10,seeds=100, first_seed=0):
+def Rstats(L=10,seeds=100, first_seed=0):
 	Ws = np.linspace(0.1,6.1,31)
 	R = {}
 	for W in Ws:
@@ -24,13 +24,18 @@ def R(L=10,seeds=100, first_seed=0):
 				pass
 
 	elif L < 15:
+		print('right part!')
+		print('seeds', first_seed,' - ',first_seed+seeds)
 		for seed in np.arange(first_seed,first_seed+seeds,1):
+			#print(seed)
 			try:
 				filename = '/home/projects/ku_00067/scratch/mbl-intrinsicdimension/fulldataset/L-{}/eigvecs-and-eigvals-L-{}-seed-{}.npy'.format(L,L,seed)
 				data = np.load(filename, allow_pickle=True)
+				#print('data',data)
 				for index2, W in enumerate(Ws):
 					W = round(W,1)
 					eigs = data.item()[W]['eigvals']
+					#print('eigs',eigs)
 					R[round(W,1)][seed] = r_stat(eigs)
 			except:
 				print('Not found:',filename)
@@ -48,10 +53,10 @@ def R(L=10,seeds=100, first_seed=0):
 				R[W]=None
 		return R
 
-	print(R)
+	#print('R',R)
 	R_means = {}
 	for W in Ws:
 		W = round(W,1)
 		R_means[W] = np.mean(list(R[W].values()))
-	print(R_means)
+	#print('R_means',R_means)
 	return R_means
