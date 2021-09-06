@@ -305,8 +305,8 @@ def L2_loss_linear_originBound(X,Y, slope):
 def weigt_from_loss(loss):
     return 1/loss
 
-def scale_collapse2(data, ws, rho_c0=3.5, nu0=2., zeta0=2., skip_initial = 2, drop_ls = 0):
-    l = [8,10,12]
+def scale_collapse2(data, ws, l = [8,10,12],rho_c0=3.5, nu0=2., zeta0=2., skip_initial = 2, drop_ls = 0):
+    
     a = data
     da = a / 100
 
