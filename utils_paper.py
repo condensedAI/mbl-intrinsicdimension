@@ -7,6 +7,7 @@ from sklearn.cluster import AffinityPropagation, Birch, SpectralClustering, Mean
 from sklearn.cluster import AgglomerativeClustering, DBSCAN, OPTICS, KMeans
 import seaborn as sns
 import fssa
+from scipy.stats import chisquare
     
 ## Building the Hamiltonian 
 def binaryConvert(x=5, L=4):
@@ -338,3 +339,141 @@ def scale_collapse2(data, ws, l = [8,10,12],rho_c0=3.5,
     print('Quality check done') 
 
     plt.show()
+
+
+def make_problem_sketch(num_points = 1000, elev=30, azim=65):
+    x, y = np.random.randn(num_points), np.random.randn(num_points)
+    z = x
+    fig = plt.figure(figsize=(4,4))
+    ax = fig.add_subplot(projection='3d')
+    ax.scatter(x,y,z, c=y, s=35)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.view_init(30, 65)
+
+def eigenC_analysis(num_lims=8,L=8,min_disorder =0.5, max_disorder=5.5 ,steps=11, seeds=10, location='data/'):
+    ws=np.linspace(min_disorder, max_disorder, steps)
+    lims=np.logspace((1-num_lims),0,num_lims)
+    maxs, lower_than = np.zeros((steps, seeds)), np.zeros((steps, num_lims, seeds))
+    for index0, W in enumerate(ws):
+        for index1, seed in enumerate(range(seeds)):
+            filename = location+'/results-L-{}-W-{}-seed-{}.npz'.format(L, W, seed)
+            eigs = abs(load_eigs(filename, 'vecs').flatten())
+            maxs[index0,index1] = np.max(eigs)
+            for index2, lim in enumerate(lims):
+                count = count_lower_than(eigs, lim)
+                lower_than[index0,index2, index1] = count
+    means = np.mean(lower_than, axis=2).T/binomial(L)**2
+    return means, maxs, lims
+
+def eigenC_plots(means, maxs, 
+                 lims = np.logspace((1-8),0,8),
+                 min_disorder =0.5, max_disorder=5.5 ,steps=11, seeds =10, L=8,
+                 colors = 'orange, lightblue, salmon, yellowgreen, grey, purple'.split(', ')
+                ):
+    
+    ws=np.linspace(min_disorder, max_disorder, steps)
+    # Plot 1: proportion below threshhold
+
+    fig, ax  = plt.subplots(2,1, sharex=True, 
+                           gridspec_kw={'height_ratios':[2,1]},
+                           figsize=(10,6))
+    #fig,ax = plt.subplots()
+    #ax2=ax.twinx()
+    for i, color in zip(range(len(means)), colors):
+
+        ax[0].fill_between(ws, means[i], means[i+1],
+                         label=lims[i],
+                         color=color, alpha=.3)
+    ax[0].legend(bbox_to_anchor=(1, 1.), )
+
+    #plt.xlabel('Disorder strength, $W$', fontsize=12)
+    ax[0].set_ylabel('Proportion of $|\lambda_c|<\zeta$ ', fontsize=12)
+    #plt.title('Eigencomponent, $\lambda_c$, Dominance-chart', fontsize=14)
+
+    #plt.savefig('figures/Domination-chart-L{}-seeds{},ws{}.png'.format(L,seeds,len(ws)), dpi=500, bbox_inches='tight')
+    
+    
+    # Plot 2: Maxs
+    #plt.figure()
+    for index, i in enumerate(maxs):
+        ax[1].scatter([ws[index]]*seeds, 1-i, c='b', alpha=2/seeds)
+        ax[1].scatter([ws[index]], 1-np.mean(i), c='r', alpha=0.9)
+        
+    ax[1].legend(["point", "mean"],#bbox_to_anchor=(0.2, .25),
+    	facecolor='white', framealpha=1)
+
+    plt.xlabel('Disorder strength, $W$', fontsize=13)
+    ax[1].set_ylabel('$1-max(|\lambda_c|)$', fontsize=13)
+    #plt.title('Dominance of largest eigencomponent, $\lambda_c$', fontsize=14)
+    #.grid()
+    
+    plt.suptitle('Eigencomponent, $\kappa$, dominance', fontsize=16)
+
+    plt.savefig('figures/Domination-chart_comb-L{}-seeds{},ws{}.png'.format(L,seeds,len(ws)), dpi=500, bbox_inches='tight')
+    
+def get_slope_loss_and_weight(ws, seeds, L, location='data/'):
+    
+
+    slope_loss_and_weight = np.zeros((len(ws),seeds,3))
+    index0 =-1
+    for W in tqdm(ws):
+        index0 += 1
+        for index1, seed in enumerate(range(seeds)):
+            filename = location+'/results-L-{}-W-{}-seed-{}.npz'.format(L, W, seed)
+            eigs = load_eigs(filename, 'vecs')
+            x,y,slope = nn2(eigs, plot=False, return_xy=True)
+            loss = L2_loss_linear_originBound(x,y,slope)
+            weight = weigt_from_loss(loss)
+            slope_loss_and_weight[index0,index1] = np.array([slope,loss,weight])
+    return slope_loss_and_weight
+
+def plot_ID_weights(slope_loss_and_weight, L, seeds, ws):
+    fig, ax = plt.subplots(1,2, figsize=(8,4), sharey=True)
+    ax[0].set_ylabel('Disorder Strength', fontsize=13)
+    pos0 = ax[0].imshow(slope_loss_and_weight[:,:,0], aspect=8, cmap='viridis') # disorder on x-axis, seed on y-axis, weight & slope by color or number
+    pos1 = ax[1].imshow(slope_loss_and_weight[:,:,2], aspect=12, cmap='magma_r') # disorder on x-axis, seed on y-axis, weight & slope by color or number
+    fig.suptitle('Intrinsic dim. and weight', fontsize=16)
+    fig.text(0.3,0.075,'Disorder realization (seed)', fontsize=13)
+    fig.colorbar(pos1, ax=ax[1], )
+    fig.colorbar(pos0, ax=ax[1])
+    plt.savefig('figures/ID-and-weights-L{}-seeds{},ws{}.png'.format(L,seeds,len(ws)), dpi=500, bbox_inches='tight')
+
+
+def weighted_average_m1(distribution, weights): 
+    # https://towardsdatascience.com/3-ways-to-compute-a-weighted-average-in-python-4e066de7a719
+    numerator = sum([distribution[i]*weights[i] for i in range(len(distribution))])
+    denominator = sum(weights)
+    
+    return numerator/denominator
+
+
+def distance_between_vectors_euclidean_dotProduct(a,b):
+    return np.sqrt(np.dot(a-b,a-b))
+
+
+def nn2_new(A):
+    N  = len(A)
+    #Make distance matrix
+    dist_M = np.array([[distance_between_vectors_euclidean_dotProduct(a,b) if index0 < index1 else 0 for index1, b in enumerate(A)] for index0, a in enumerate(A)])
+    dist_M += dist_M.T + np.eye(N)*42
+    
+    # Calculate mu
+    argsorted = np.sort(dist_M, axis=1)
+    mu =  argsorted[:,1]/argsorted[:,0]
+    x = np.log(mu)
+    
+    # Permutation
+    y = np.array([1-dict(zip(np.argsort(mu)+1,(np.arange(1,N+1)/N)))[i+1] for i in range(N)])
+    
+    x,y  = x[y>0], y[y>0]
+    y = -1*np.log(y)
+    
+    #fit line through origin to get the dimension
+    d = np.linalg.lstsq(np.vstack([x, np.zeros(len(x))]).T, y, rcond=None)[0][0]
+    
+    # Goodness
+    _, pvalue = chisquare(f_obs=x*d , f_exp=y, ddof=1)
+    
+    return d, pvalue
