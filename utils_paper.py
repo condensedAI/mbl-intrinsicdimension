@@ -244,14 +244,14 @@ def nn2(data, plot=False, return_xy = False,eps=.01, xshift=False, del_vals=2):
             else:
                 distance = sum(abs((eigvec1-eigvec2)))
                 distance_matrix[i,j], distance_matrix[j,i] = distance, distance
-        #print(distance_matrix) # To see how it fills √
+    #print(distance_matrix) # To see how it fills √
 
     # table of distances - state and \mu= r_2/r_1
     mu = np.zeros((N,2))
     for index, line in enumerate(distance_matrix):
         r1, r2 = sorted(line)[1:3]
         mu[index,0] = index+1
-        mu[index,1] = r2/(r1+eps)
+        mu[index,1] = r2/r1
     if xshift == True:
         mu[:,1] -= min(mu[:,1])+1
         
@@ -271,9 +271,6 @@ def nn2(data, plot=False, return_xy = False,eps=.01, xshift=False, del_vals=2):
     x = x[y>0]
     y = y[y>0]
     
-
-	
-
     y = -1*np.log(y)
     #y2 = -1*np.log(y2)
 	
@@ -282,18 +279,23 @@ def nn2(data, plot=False, return_xy = False,eps=.01, xshift=False, del_vals=2):
 
     if plot==True:
         #fig, ax = plt.subplots(2,1, sharex=True)
-        plt.scatter(x,y, c='g')
-        plt.plot(x,x*d, c='r', ls='--')
+        plt.scatter(x,y, c='purple', alpha=0.5)
+        plt.plot(x,x*d, c='orange', ls='-')
+        plt.title('2NN output for single realization', fontsize=16)
+        plt.xlabel('$\log(\mu)$', fontsize=14)
+        plt.ylabel('$1 - F(\mu)$', fontsize=14)
+        plt.grid()
+        plt.savefig('figures/2nnSingle_L{}'.format(10),dpi=400,bbox_inches='tight')
         
       #ax[plot_index].set_xlabel('log($\mu$)', fontsize=12)
         #plt.text(0,5,'w={}'.format(w), fontsize=13)
         #plt.text(0,4.5,'d={}'.format(round(d,3)), fontsize=13)
         
-            
+    _, pvalue = chisquare(f_obs=x*d , f_exp=y, ddof=1)        
     if return_xy:
-        return x,y, d#,x2,y2
+        return x,y, d, pvalue#,x2,y2
     else:
-        return d
+        return d, pvalue
 
 def L2_loss_linear_originBound(X,Y, slope):
     L = np.zeros(len(X))
@@ -314,13 +316,13 @@ def scale_collapse2(data, ws, l = [8,10,12],rho_c0=3.5,
 
     res = fssa.autoscale(l=l, rho=ws, a=a, da=da, rho_c0=rho_c0, nu0=nu0, zeta0=zeta0)
     print('autoscale done')
-    fig, ax = plt.subplots(figsize=(14,4))
+    fig, ax = plt.subplots()
 
     for index, L in enumerate(l):
-        ax.plot(ws, a[index], label=L)
+        ax.plot(ws, a[index], label='L={}'.format(L))
     ax.legend()
-    ax.set_xlabel('Disorder strength', fontsize=13)
-    ax.set_ylabel('Intrinsic dimension', fontsize=13)
+    ax.set_xlabel('Disorder strength, $W$', fontsize=14)
+    ax.set_ylabel('$\overline{\mathcal{D}_{int}}$', fontsize=14)
     axin = ax.inset_axes([0.5, 0.5, 0.45, 0.45])
 
     #print(res)
@@ -333,12 +335,14 @@ def scale_collapse2(data, ws, l = [8,10,12],rho_c0=3.5,
         axin.plot(X[index], Y[index])
 
     quality = fssa.quality(X,Y,da)
-    fig.suptitle('Mean ID with collapse on inset: w/ params: rho={}, nu={}, zeta={}'. format(round(res['rho'],2), 
-                                                                                  round(res['nu'],2), 
-                                                                                    round(res['zeta'],2)), fontsize=16)
+    fig.suptitle('$\overline{\mathcal{D}_{int}}$ with collapse on inset',#': w/ params: rho={}, nu={}, zeta={}'. format(round(res['rho'],2), 
+                        #                                                          round(res['nu'],2), 
+                             #                                                       round(res['zeta'],2)), 
+    fontsize=16)
     print('Quality check done') 
 
-    plt.show()
+    #plt.show()
+    return res
 
 
 def make_problem_sketch(num_points = 1000, elev=30, azim=65):
@@ -386,10 +390,10 @@ def eigenC_plots(means, maxs,
         ax[0].fill_between(ws, means[i], means[i+1],
                          label=lims[i],
                          color=color, alpha=.3)
-    ax[0].legend(bbox_to_anchor=(1, 1.), )
+    ax[0].legend(bbox_to_anchor=(1, 1.), fontsize=12)
 
     #plt.xlabel('Disorder strength, $W$', fontsize=12)
-    ax[0].set_ylabel('Proportion of $|\lambda_c|<\zeta$ ', fontsize=12)
+    ax[0].set_ylabel('Proportion of $|\lambda_c|<\zeta$ ', fontsize=14)
     #plt.title('Eigencomponent, $\lambda_c$, Dominance-chart', fontsize=14)
 
     #plt.savefig('figures/Domination-chart-L{}-seeds{},ws{}.png'.format(L,seeds,len(ws)), dpi=500, bbox_inches='tight')
@@ -402,43 +406,41 @@ def eigenC_plots(means, maxs,
         ax[1].scatter([ws[index]], 1-np.mean(i), c='r', alpha=0.9)
         
     ax[1].legend(["point", "mean"],#bbox_to_anchor=(0.2, .25),
-    	facecolor='white', framealpha=1)
+    	facecolor='white', framealpha=1,
+        fontsize=14)
 
-    plt.xlabel('Disorder strength, $W$', fontsize=13)
-    ax[1].set_ylabel('$1-max(|\lambda_c|)$', fontsize=13)
+    plt.xlabel('Disorder strength, $W$', fontsize=14)
+    ax[1].set_ylabel('$1-max(|\lambda_c|)$', fontsize=14)
     #plt.title('Dominance of largest eigencomponent, $\lambda_c$', fontsize=14)
     #.grid()
     
-    plt.suptitle('Eigencomponent, $\kappa$, dominance', fontsize=16)
+    plt.suptitle('Eigencomponent, $\kappa$, dominance', fontsize=17)
 
     plt.savefig('figures/Domination-chart_comb-L{}-seeds{},ws{}.png'.format(L,seeds,len(ws)), dpi=500, bbox_inches='tight')
     
 def get_slope_loss_and_weight(ws, seeds, L, location='data/'):
     
 
-    slope_loss_and_weight = np.zeros((len(ws),seeds,3))
+    slope_loss_and_weight = np.zeros((len(ws),seeds,2))
     index0 =-1
     for W in tqdm(ws):
         index0 += 1
         for index1, seed in enumerate(range(seeds)):
             filename = location+'/results-L-{}-W-{}-seed-{}.npz'.format(L, W, seed)
             eigs = load_eigs(filename, 'vecs')
-            x,y,slope = nn2(eigs, plot=False, return_xy=True)
-            loss = L2_loss_linear_originBound(x,y,slope)
-            weight = weigt_from_loss(loss)
-            slope_loss_and_weight[index0,index1] = np.array([slope,loss,weight])
+            x,y,slope, pvalue = nn2(eigs, plot=False, return_xy=True)
+            slope_loss_and_weight[index0,index1] = np.array([slope,pvalue])
     return slope_loss_and_weight
 
-def plot_ID_weights(slope_loss_and_weight, L, seeds, ws):
-    fig, ax = plt.subplots(1,2, figsize=(8,4), sharey=True)
-    ax[0].set_ylabel('Disorder Strength', fontsize=13)
-    pos0 = ax[0].imshow(slope_loss_and_weight[:,:,0], aspect=8, cmap='viridis') # disorder on x-axis, seed on y-axis, weight & slope by color or number
-    pos1 = ax[1].imshow(slope_loss_and_weight[:,:,2], aspect=12, cmap='magma_r') # disorder on x-axis, seed on y-axis, weight & slope by color or number
-    fig.suptitle('Intrinsic dim. and weight', fontsize=16)
-    fig.text(0.3,0.075,'Disorder realization (seed)', fontsize=13)
-    fig.colorbar(pos1, ax=ax[1], )
-    fig.colorbar(pos0, ax=ax[1])
-    plt.savefig('figures/ID-and-weights-L{}-seeds{},ws{}.png'.format(L,seeds,len(ws)), dpi=500, bbox_inches='tight')
+def plot_ID_weights(slope_loss_and_weight, ws):
+    plt.imshow(slope_loss_and_weight[:,:,0].T,
+           aspect=.5*slope_loss_and_weight.shape[0]/slope_loss_and_weight.shape[1],cmap = 'viridis', )
+    plt.colorbar(aspect=2.5)
+    plt.title('$\mathcal{D}_{int}$ for many realizations', fontsize=16)
+    plt.ylabel('Seed number', fontsize=14)
+    plt.xlabel('Disorder strength, $W$', fontsize=14)
+    plt.xticks(np.linspace(0,10,5), [ws[2*i] for i in range(5)])
+    #plt.show()
 
 
 def weighted_average_m1(distribution, weights): 
@@ -458,6 +460,7 @@ def nn2_new(A):
     #Make distance matrix
     dist_M = np.array([[distance_between_vectors_euclidean_dotProduct(a,b) if index0 < index1 else 0 for index1, b in enumerate(A)] for index0, a in enumerate(A)])
     dist_M += dist_M.T + np.eye(N)*42
+    print(dist_M)
     
     # Calculate mu
     argsorted = np.sort(dist_M, axis=1)
@@ -465,8 +468,10 @@ def nn2_new(A):
     x = np.log(mu)
     
     # Permutation
-    y = np.array([1-dict(zip(np.argsort(mu)+1,(np.arange(1,N+1)/N)))[i+1] for i in range(N)])
+    dic = dict(zip(np.argsort(mu),(np.arange(1,N+1)/N)))
+    y = np.array([1-dic[i] for i in range(N)])
     
+    # Drop bad values (negative y's)
     x,y  = x[y>0], y[y>0]
     y = -1*np.log(y)
     
